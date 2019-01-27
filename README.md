@@ -1,6 +1,6 @@
-# eibhear
+# Eibhear
 
-TODO: Write a description here
+Extends Granite models to use translatable fields
 
 ## Installation
 
@@ -8,7 +8,7 @@ TODO: Write a description here
 ```yaml
 dependencies:
   eibhear:
-    github: your-github-user/eibhear
+    github: samuallb/eibhear
 ```
 2. Run `shards install`
 
@@ -18,8 +18,11 @@ dependencies:
 require "eibhear"
 ```
 
-TODO: Write usage instructions here
-
+```crystal
+Person < Granite::Base
+  include Eibhear::Translatable
+end
+```
 ## Development
 
 TODO: Write development instructions here
@@ -34,4 +37,4 @@ TODO: Write development instructions here
 
 ## Contributors
 
-- [Samual Black](https://github.com/your-github-user) - creator and maintainer
+- [Samual Black](https://github.com/SamualLB) - creator and maintainer
