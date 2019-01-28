@@ -47,16 +47,30 @@ module Eibhear::Fields
         @[YAML::Field({{**options[:yaml_options]}})]
       {% end %}
 
-      # From granite/fields.cr:65
-      #
-      # Apply property comment if exists
-      {% if options[:comment] %}
-        {{options[:comment].id}}
-      {% end %}
-      property{{suffixes[0].id}} {{name.id}} : Union({{type.id}} | Nil){% if options[:default] %} = {{options[:default]}} {% end %}
-      disable_eibhear_docs? def {{name.id}}{{suffixes[1].id}}
-        raise {{@type.name.stringify}} + "#" + {{name.stringify}} + " cannot be nil" if @{{name.id}}.nil?
-        @{{name.id}}.not_nil!
+      # Create methods for accessing translations
+
+      # Access using default locale
+      def {{name.id}}(force_locale : String? = nil)
+        {{name.id}} force_locale ? [force_locale] : [] of String
+      end
+
+      def {{name.id}}(locales : Array(String))
+        if locales.empty?
+          # fill with default from config
+        end
+        locales.each do |locale|
+          row = {{@@eibhear_class.name}}.find_by(test_field: "test_value")
+          #row = @@eibhear_class.find_by({{@type.name}}.primary_name(): {{@type.name}}.primary_name)
+        end
+        nil
+      end
+
+      def {{name.id}}!(force_locale : String? = nil)
+        {{name.id}}! force_locale ? [force_locale] : [] of String
+      end
+
+      def {{name.id}}!(locales : Array(String))
+        raise "Property '{{name.id}}' not found in locale: #{locales}" unless {{name.id}}(locales)
       end
 
     {% end %}

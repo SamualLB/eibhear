@@ -28,18 +28,25 @@ module Eibhear::Table
     {% table_name = EIBHEAR_SETTINGS[:table_name] || name_space.underscore %}
     {% class_name = EIBHEAR_SETTINGS[:class_name] || "Translation".id %}
     @@eibhear_table_name = "{{table_name}}"
+    @@eibhear_class = "{{class_name}}"
 
     disable_eibhear_docs? def self.eibhear_table_name
       @@eibhear_table_name
     end
 
-    disable_granite_docs? def self.quoted_eibhear_table_name
+    disable_eibhear_docs? def self.quoted_eibhear_table_name
       @@adapter.quote(eibhear_table_name)
     end
 
     # Create model for the translation table
     class {{class_name}} < Granite::Base
-      adapter {{EIBHEAR_SETTINGS[:adapter]}}
+
+      # Create adapter in translation table
+      {% if EIBHEAR_SETTINGS[:adapter] %}
+        class_getter adapter : Granite::Adapter::Base = Granite::Adapters.registered_adapters.find { |a| a.name === {{EIBHEAR_SETTINGS[:adapter].stringify}} } || raise "No registered adapter with the name '{{EIBHEAR_SETTINGS[:adapter].id}}'"
+      {% else %} # Not set by user, copy from parent
+        class_getter adapter : Granite::Adapter::Base = {{@type.name}}.adapter
+      {% end %}
 
       primary id : String, auto: false
 
