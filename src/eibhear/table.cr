@@ -1,7 +1,51 @@
 module Eibhear::Table
-
-  macro __process_i18n_table
-
+  # Reset for next include
+  macro included
+    macro included
+      disable_eibhear_docs? EIBHEAR_SETTINGS = {} of Nil => Nil
+    end
   end
 
+  # Override?
+  macro eibhear_adapter(name)
+    {% EIBHEAR_SETTINGS[:adapter] = name.id %}
+  end
+
+  # Specify table name for the translation table,
+  # otherwise will be built from table name
+  macro eibhear_table_name(name)
+    {% EIBHEAR_SETTINGS[:table_name] = name.id %}
+  end
+
+  # Specify class name for translation model,
+  # otherwise it will use Translation
+  macro eibhear_class_name(name)
+    {% EIBHEAR_SETTINGS[:class_name] = name.id %}
+  end
+
+  macro __process_i18n_table
+    {% name_space = @type.name.gsub(/::/, "_").id + "_Translation" %}
+    {% table_name = EIBHEAR_SETTINGS[:table_name] || name_space.underscore %}
+    {% class_name = EIBHEAR_SETTINGS[:class_name] || "Translation".id %}
+    @@eibhear_table_name = "{{table_name}}"
+
+    disable_eibhear_docs? def self.eibhear_table_name
+      @@eibhear_table_name
+    end
+
+    disable_granite_docs? def self.quoted_eibhear_table_name
+      @@adapter.quote(eibhear_table_name)
+    end
+
+    # Create model for the translation table
+    class {{class_name}} < Granite::Base
+      adapter {{EIBHEAR_SETTINGS[:adapter]}}
+
+      primary id : String, auto: false
+
+      {% for name, options in I18N_FIELDS %}
+        field {{name}} : String, {{options.double_splat}}
+      {% end %}
+    end
+  end
 end
