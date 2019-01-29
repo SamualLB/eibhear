@@ -57,10 +57,11 @@ module Eibhear::Fields
       def {{name.id}}(locales : Array(String))
         if locales.empty?
           # fill with default from config
+          locales << "en"
         end
         locales.each do |locale|
-          row = {{@@eibhear_class.name}}.find_by(test_field: "test_value")
-          #row = @@eibhear_class.find_by({{@type.name}}.primary_name(): {{@type.name}}.primary_name)
+          row = @@eibhear_class.find_by({{@type.name.underscore}}_id: {{@type.name}}.primary_name, locale_id: locale)
+          return row if row
         end
         nil
       end

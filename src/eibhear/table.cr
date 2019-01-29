@@ -28,7 +28,7 @@ module Eibhear::Table
     {% table_name = EIBHEAR_SETTINGS[:table_name] || name_space.underscore %}
     {% class_name = EIBHEAR_SETTINGS[:class_name] || "Translation".id %}
     @@eibhear_table_name = "{{table_name}}"
-    @@eibhear_class = "{{class_name}}"
+    class_getter eibhear_class = {{class_name}}
 
     disable_eibhear_docs? def self.eibhear_table_name
       @@eibhear_table_name
@@ -48,7 +48,8 @@ module Eibhear::Table
         class_getter adapter : Granite::Adapter::Base = {{@type.name}}.adapter
       {% end %}
 
-      primary id : String, auto: false
+      field locale_id : String
+      field {{@type.name.underscore}}_id : Int64
 
       {% for name, options in I18N_FIELDS %}
         field {{name}} : String, {{options.double_splat}}
