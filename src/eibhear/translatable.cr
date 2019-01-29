@@ -14,8 +14,8 @@ module Eibhear::Translatable
   
   macro included
     macro finished
-      __process_i18n_table
-      __process_i18n_fields
+      __process_eibhear_table
+      __process_eibhear_fields
     end
   end
 

@@ -2,21 +2,21 @@ module Eibhear::Fields
   # Reset for next include
   macro included
     macro included
-      I18N_FIELDS = {} of Nil => Nil
+      EIBHEAR_FIELDS = {} of Nil => Nil
     end
   end
 
-  macro i18n_field(decl, **options)
-    {% I18N_FIELDS[decl.id] = options || {} of Nil => Nil %}
-    {% I18N_FIELDS[decl.id][:type] = String %}
+  macro eibhear_field(decl, **options)
+    {% EIBHEAR_FIELDS[decl.id] = options || {} of Nil => Nil %}
+    {% EIBHEAR_FIELDS[decl.id][:type] = String %}
   end
 
-  macro i18n_field!(decl, **options)
-    i18n_field {{decl}}, {{options.double_splat(", ")}}raise_on_nil: true
+  macro eibhear_field!(decl, **options)
+    eibhear_field {{decl}}, {{options.double_splat(", ")}}raise_on_nil: true
   end
 
-  macro __process_i18n_fields
-    {% for name, options in I18N_FIELDS %}
+  macro __process_eibhear_fields
+    {% for name, options in EIBHEAR_FIELDS %}
       {% type = options[:type] %}
       {% suffixes = options[:raise_on_nil] ? ["?", ""] : ["", "!"] %}
 
@@ -50,27 +50,27 @@ module Eibhear::Fields
       # Create methods for accessing translations
 
       # Access using default locale
-      def {{name.id}}(force_locale : String? = nil)
+      def {{name.id}}(force_locale : String? = nil) : String?
         {{name.id}} force_locale ? [force_locale] : [] of String
       end
 
-      def {{name.id}}(locales : Array(String))
+      def {{name.id}}(locales : Array(String)) : String?
         if locales.empty?
-          # fill with default from config
-          locales << "en"
+          # TODO: fill with default from config
+          locales = Eibhear.config.locales
         end
         locales.each do |locale|
-          row = @@eibhear_class.find_by({{@type.name.underscore}}_id: {{@type.name}}.primary_name, locale_id: locale)
-          return row if row
+          row = get_eibhear_locale(locale)
+          return row.{{name.id}} if row
         end
         nil
       end
 
-      def {{name.id}}!(force_locale : String? = nil)
+      def {{name.id}}!(force_locale : String? = nil) : String
         {{name.id}}! force_locale ? [force_locale] : [] of String
       end
 
-      def {{name.id}}!(locales : Array(String))
+      def {{name.id}}!(locales : Array(String)) : String
         raise "Property '{{name.id}}' not found in locale: #{locales}" unless {{name.id}}(locales)
       end
 
@@ -80,19 +80,27 @@ module Eibhear::Fields
     #
     # Keep a hash of the fields to be used for mapping
     #disable_eibhear_docs?
-    def self.i18n_fields : Array(String)
-      @@fields ||= {{ I18N_FIELDS.empty? ? "[] of String".id : I18N_FIELDS.keys.map(&.id.stringify) }}
+    def self.eibhear_fields : Array(String)
+      @@fields ||= {{ EIBHEAR_FIELDS.empty? ? "[] of String".id : EIBHEAR_FIELDS.keys.map(&.id.stringify) }}
     end
 
     # From granite/fields.cr:85
     #
     # Keep a hash of the params that will be passed to the adapter
-    disable_eibhear_docs? def i18n_values
+    disable_eibhear_docs? def eibhear_values
       parsed_params = [] of Granite::Fields::Type
-      {% for name, options in I18N_FIELDS %}
+      {% for name, options in EIBHEAR_FIELDS %}
         parsed_params << {{name.id}}
       {% end %}
       return parsed_params
+    end
+
+    private def get_eibhear_locale(locale : String)
+      current = eibhear_locales[locale]?
+      return current if current
+      current = @@eibhear_class.find_by({{@type.name.underscore}}_id: {{PRIMARY[:name]}}(), locale: locale)
+      return eibhear_locales[locale] = current if current
+      nil
     end
 
     # TODO: This will have to override

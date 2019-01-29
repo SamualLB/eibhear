@@ -23,7 +23,7 @@ module Eibhear::Table
     {% EIBHEAR_SETTINGS[:class_name] = name.id %}
   end
 
-  macro __process_i18n_table
+  macro __process_eibhear_table
     {% name_space = @type.name.gsub(/::/, "_").id + "_Translation" %}
     {% table_name = EIBHEAR_SETTINGS[:table_name] || name_space.underscore %}
     {% class_name = EIBHEAR_SETTINGS[:class_name] || "Translation".id %}
@@ -38,6 +38,8 @@ module Eibhear::Table
       @@adapter.quote(eibhear_table_name)
     end
 
+    getter eibhear_locales = {} of String => {{class_name}}
+
     # Create model for the translation table
     class {{class_name}} < Granite::Base
 
@@ -48,10 +50,10 @@ module Eibhear::Table
         class_getter adapter : Granite::Adapter::Base = {{@type.name}}.adapter
       {% end %}
 
-      field locale_id : String
+      field locale : String
       field {{@type.name.underscore}}_id : Int64
 
-      {% for name, options in I18N_FIELDS %}
+      {% for name, options in EIBHEAR_FIELDS %}
         field {{name}} : String, {{options.double_splat}}
       {% end %}
     end

@@ -3,6 +3,18 @@ require "./eibhear/*"
 
 module Eibhear
   VERSION = "0.0.1"
+
+  def self.configure
+    yield config
+  end
+
+  def self.config
+    @@config ||= Config.new
+  end
+end
+
+Eibhear.configure do |eibhear|
+  eibhear.locales = ["fr", "de", "en"]
 end
 
 Granite::Adapters << Granite::Adapter::Pg.new({name: "pg", url: "postgres://postgres:@localhost:5432/eibhear_test"})
@@ -14,7 +26,7 @@ class Test < Granite::Base
 
   field slug : String
 
-  i18n_field :test_field
+  eibhear_field :test_field
 end
 
 class Test3 < Granite::Base
@@ -22,26 +34,11 @@ class Test3 < Granite::Base
 
   adapter pg
 
-  i18n_field :third_field
+  eibhear_field :third_field
 
   eibhear_table_name test_3_translation
 end
 
-test = Test.new
+test = Test.find!(1)
 
-#test.id = 1
-#test.slug = "test slug"
-#test.test_field "en"
-
-#Test.find_by(slug: "test_slug")
-
-#Test::Translation.find_by(test_id: 1)
-
-test = Test.find(1)
-
-#pp test.test_field if test
-#puts Test.find(1).as(Test).id
-
-test.{{Test::PRIMARY[:name]}}()
-
-#Test::Translation.find_by(test_id: {{Test::PRIMARY[:name]}}(), locale_id: locale)
+puts test.test_field
