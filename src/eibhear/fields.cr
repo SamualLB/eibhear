@@ -95,6 +95,7 @@ module Eibhear::Fields
       return parsed_params
     end
 
+    # Gets a locale and fills the locale hash
     private def get_eibhear_locale(locale : String)
       current = eibhear_locales[locale]?
       return current if current
@@ -103,8 +104,13 @@ module Eibhear::Fields
       nil
     end
 
-    # TODO: This will have to override
-    #disable_eibhear_docs? def to_h
-    #end
+    # Override to add eibhear fields
+    disable_eibhear_docs? def to_h
+      granite = previous_def()
+      {% for name, options in EIBHEAR_FIELDS %}
+        granite["{{name}}"] = {{name.id}}
+      {% end %}
+      granite
+    end
   end
 end

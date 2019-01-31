@@ -42,3 +42,5 @@ end
 test = Test.find!(1)
 
 puts test.test_field
+
+puts test.to_h
