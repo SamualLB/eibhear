@@ -57,7 +57,8 @@ module Eibhear::Fields
       def {{name.id}}(locales : Array(String)) : String?
         if locales.empty?
           # TODO: fill with default from config
-          locales = Eibhear.config.locales
+          
+          locales = Eibhear.config.available_locales
         end
         locales.each do |locale|
           row = get_eibhear_locale(locale)
@@ -66,12 +67,55 @@ module Eibhear::Fields
         nil
       end
 
+      def {{name.id}}(*locales) : String?
+        {{name.id}} locales.to_a
+      end
+
       def {{name.id}}!(force_locale : String? = nil) : String
         {{name.id}}! force_locale ? [force_locale] : [] of String
       end
 
       def {{name.id}}!(locales : Array(String)) : String
         raise "Property '{{name.id}}' not found in locale: #{locales}" unless {{name.id}}(locales)
+      end
+
+      def {{name.id}}!(*locales) : String
+        {{name.id}}! locales.to_a
+      end
+
+
+      # Get property with locale used
+      #
+      # Useful for lang tag
+      def {{name.id}}_with_locale(force_locale : String? = nil) : {String, String}?
+        {{name.id}}_with_locale force_locale ? [force_locale] : [] of String
+      end
+
+      def {{name.id}}_with_locale(locales : Array(String)) : {String, String}?
+        if locales.empty?
+          locales = Eibhear.config.locales
+        end
+        locales.each do |locale|
+          row = get_eibhear_locale(locale)
+          return {row.{{name.id}}!, locale} if row
+        end
+        nil
+      end
+
+      def {{name.id}}_with_locale(*locales) : {String, String}?
+        {{name.id}}_with_locale locales.to_a
+      end
+
+      def {{name.id}}_with_locale!(force_locale : String? = nil) : {String, String}?
+        {{name.id}}_with_locale! force_locale ? [force_locale] : [] of String
+      end
+
+      def {{name.id}}_with_locale!(locales : Array(String)) : {String, String}?
+        raise "Property '{{name.id}}' not found in locale: #{locales}" unless {{name.id}}_with_locales(locales)
+      end
+
+      def {{name.id}}_with_locale!(*locales) : {String, String}?
+        {{name.id}}_with_locale! locales.to_a
       end
 
     {% end %}
@@ -102,6 +146,15 @@ module Eibhear::Fields
       current = @@eibhear_class.find_by({{@type.name.underscore}}_id: {{PRIMARY[:name]}}(), locale: locale)
       return eibhear_locales[locale] = current if current
       nil
+    end
+
+    # Fills and returns locale hash
+    def get_all_eibhear_locales
+      results = @@eibhear_class.all("WHERE {{@type.name.underscore}}_id = ?", ["#{{{PRIMARY[:name]}}}"])
+      return nil if results.empty?
+      results.each do |res|
+        eibhear_locales[res.locale!] = res
+      end
     end
 
     # Override to add eibhear fields

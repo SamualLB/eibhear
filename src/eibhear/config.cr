@@ -1,3 +1,9 @@
 class Eibhear::Config
-  property locales = ["en"]
+  @locales = [] of String
+
+  property available_locales = ["en"]
+
+  def locale
+
+  end
 end
