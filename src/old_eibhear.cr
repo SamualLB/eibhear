@@ -18,6 +18,12 @@ module Eibhear
   end
 end
 
+def create_context(request)
+  io = IO::Memory.new
+  response = HTTP::Server::Response.new(io)
+  HTTP::Server::Context.new(request, response)
+end
+
 Eibhear.configure do |eibhear|
   eibhear.available_locales = ["gr", "de", "en"]
 end
@@ -25,33 +31,21 @@ end
 Granite::Adapters << Granite::Adapter::Pg.new({name: "pg", url: "postgres://postgres:@localhost:5432/eibhear_test"})
 
 class Test < Granite::Base
-  include Eibhear::Base
+  include Eibhear::Translatable
   adapter pg
+  eibhear_adapter pg
 
   field slug : String
 
-  has_translations translations : TestTranslation, :test_field!, other_field
-end
-
-class TestTranslation < Granite::Base
-  include Eibhear::Translatable
-
-  field test_field : String
-  field other_field : String
+  eibhear_field :test_field
 end
 
 class Test3 < Granite::Base
-  include Eibhear::Base
-
-  adapter pg
-
-  has_translations Test3Translation, :third_field
-end
-
-class Test3Translation < Granite::Base
   include Eibhear::Translatable
 
   adapter pg
 
-  field third_field : String
+  eibhear_field :third_field
+
+  eibhear_table_name test_3_translation
 end
