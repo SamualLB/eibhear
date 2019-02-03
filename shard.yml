@@ -9,9 +9,6 @@ dependencies:
   granite:
     github: amberframework/granite
     version: ~> 0.15.2
-  citrine-i18n:
-    github: amberframework/citrine-i18n
-    version: ~> 0.3.2
 
 development_dependencies:
   pg:
