@@ -86,7 +86,6 @@ module Eibhear::Base
   end
 
   macro has_translations(table, *fields, **options)
-    {% EIBHEAR_TABLE[:name] = table.id %}
     {% if table.is_a? Path %}
       {% EIBHEAR_TABLE[:klass] = table.id %}
     {% else %}
