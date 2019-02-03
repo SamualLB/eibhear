@@ -19,7 +19,7 @@ module Eibhear
 end
 
 Eibhear.configure do |eibhear|
-  eibhear.available_locales = ["gr", "de", "en"]
+  eibhear.available_locales = ["gr", "de", "fr", "en"]
 end
 
 Granite::Adapters << Granite::Adapter::Pg.new({name: "pg", url: "postgres://postgres:@localhost:5432/eibhear_test"})
@@ -30,11 +30,13 @@ class Test < Granite::Base
 
   field slug : String
 
-  has_translations translations : TestTranslation, :test_field!, other_field
+  has_translations translations : TestTranslation, :test_field, other_field
 end
 
 class TestTranslation < Granite::Base
   include Eibhear::Translatable
+
+  adapter pg
 
   field test_field : String
   field other_field : String
@@ -45,7 +47,7 @@ class Test3 < Granite::Base
 
   adapter pg
 
-  has_translations Test3Translation, :third_field
+  has_translations :test_3_translation, :third_field, foreign_key: test_3_id
 end
 
 class Test3Translation < Granite::Base
@@ -55,3 +57,7 @@ class Test3Translation < Granite::Base
 
   field third_field : String
 end
+
+test = Test.find!(1)
+
+puts test.test_field_with_locale("en")
