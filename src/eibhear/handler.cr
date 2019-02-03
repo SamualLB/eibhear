@@ -41,4 +41,3 @@ class Eibhear::Handler
     end
   end
 end
-g
