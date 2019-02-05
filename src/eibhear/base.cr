@@ -23,6 +23,16 @@ module Eibhear::Base
       eibhear_translations
     end
 
+    def new_{{EIBHEAR_TABLE[:klass].id.underscore}}(*args, **named_args) : {{EIBHEAR_TABLE[:klass]}}
+      hash = named_args.to_h
+      unless (loc = args[0]?).nil?
+        hash[:locale] = loc
+      end
+      tr = {{EIBHEAR_TABLE[:klass]}}.new(hash)
+      tr.{{EIBHEAR_TABLE[:foreign_key].id}} = primary_key_value
+      tr
+    end
+
     {% for field in EIBHEAR_FIELDS %}
       {% suffixes = field[:raise_on_nil] ? ["?".id, "".id] : ["".id, "!".id] %}
 
