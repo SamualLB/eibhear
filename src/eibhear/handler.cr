@@ -1,5 +1,4 @@
 require "http/server/handler"
-require "citrine-i18n"
 
 class Eibhear::Handler
   include HTTP::Handler
